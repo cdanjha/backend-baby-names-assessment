@@ -16,7 +16,7 @@ import argparse
 
 """
 Define the extract_names() function below and change main()
-to call it.
+to call it.             
 
 For writing regex, it's nice to include a copy of the target
 text for inspiration.
@@ -47,6 +47,31 @@ def extract_names(filename):
     """
     names = []
     # +++your code here+++
+    with open(filename) as f:
+        text = f.read()
+
+    year_match = re.search(r"Popularity\sin\s(\d\d\d\d)", text)
+    if not year_match:
+        print("could not extract year")
+        return None
+    year = year_match.group(1)
+    print("found year: {}".format(year))
+    names.append(year)
+
+    tuples = re.findall(r"<td>(\d+)</td><td>(\w+)</td><td>(\w+)</td>", text)
+
+    names_rank = {}
+    for rank, boy, girl in tuples:
+        if boy not in names_rank:
+            names_rank[boy] = rank
+        if girl not in names_rank:
+            names_rank[girl] = rank
+
+    sorted_names = sorted(names_rank.keys())
+    for name in sorted_names:
+        names.append(name + ' ' +names_rank[name])
+
+
     return names
 
 
@@ -82,7 +107,15 @@ def main(args):
     # or to write the list to a summary file e.g. `baby1990.html.summary`
 
     # +++your code here+++
+    for filename in file_list:
+        result = extract_names(filename)
+        text = '\n'.join(result)
 
-
+        if create_summary:
+            with open(filename + '.summary', 'w') as outf:
+                outf.write(text + '\n')
+        else:
+            print(text)
+   
 if __name__ == '__main__':
     main(sys.argv[1:])
